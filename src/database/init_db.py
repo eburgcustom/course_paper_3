@@ -1,4 +1,3 @@
-import os
 import sys
 from pathlib import Path
 
@@ -53,17 +52,17 @@ def create_tables() -> None:
     # Создаем таблицы
     try:
         print("Создаем таблицы в базе данных...")
-        
+
         # Создаем таблицу работодателей
         execute_query(create_employers_table)
         print("Таблица 'employers' успешно создана")
-        
+
         # Создаем таблицу вакансий
         execute_query(create_vacancies_table)
         print("Таблица 'vacancies' успешно создана")
-        
+
         print("Инициализация базы данных завершена успешно!")
-        
+
     except Exception as e:
         print(f"Ошибка при создании таблиц: {e}")
         raise
@@ -75,13 +74,13 @@ def init_database() -> None:
     """
     try:
         print("Начало инициализации базы данных...")
-        
+
         # Создаем базу данных, если она не существует
         create_database()
-        
+
         # Создаем таблицы
         create_tables()
-        
+
     except Exception as e:
         print(f"Ошибка при инициализации базы данных: {e}")
         sys.exit(1)

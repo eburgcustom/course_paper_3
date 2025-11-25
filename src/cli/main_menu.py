@@ -78,11 +78,11 @@ class MainMenu:
         """Загружает тестовые данные."""
         print("\nЗагрузка тестовых данных...")
         example_employers = [
-            '1740',  # Яндекс
-            '3529',  # Сбер
-            '78638',  # Тинькофф
-            '3776',  # МТС
-            '2180',  # Озон
+            "1740",  # Яндекс
+            "3529",  # Сбер
+            "78638",  # Тинькофф
+            "3776",  # МТС
+            "2180",  # Озон
         ]
         self.data_loader.load_employers(example_employers)
         input("\nНажмите Enter для продолжения...")
@@ -126,7 +126,7 @@ class MainMenu:
             try:
                 index = int(choice) - 1
                 if 0 <= index < len(employers):
-                    employer_id = employers[index]['id']
+                    employer_id = employers[index]["id"]
                     print(f"\nЗагрузка данных для {employers[index]['name']}...")
                     self.data_loader.load_employers([employer_id])
                     break
@@ -163,8 +163,8 @@ class MainMenu:
             return
 
         for i, vacancy in enumerate(vacancies, 1):
-            salary_from = f"от {vacancy['salary_from']} {vacancy['salary_currency']}" if vacancy['salary_from'] else ""
-            salary_to = f"до {vacancy['salary_to']} {vacancy['salary_currency']}" if vacancy['salary_to'] else ""
+            salary_from = f"от {vacancy['salary_from']} {vacancy['salary_currency']}" if vacancy["salary_from"] else ""
+            salary_to = f"до {vacancy['salary_to']} {vacancy['salary_currency']}" if vacancy["salary_to"] else ""
             salary = " ".join(filter(None, [salary_from, salary_to]))
             salary = salary or "з/п не указана"
 
@@ -180,7 +180,7 @@ class MainMenu:
         print("\n=== Средняя зарплата по вакансиям ===")
         result = self.db_manager.get_avg_salary()
 
-        if not result or result['avg_salary'] == 0:
+        if not result or result["avg_salary"] == 0:
             print("Недостаточно данных для расчета средней зарплаты.")
         else:
             print(f"Средняя зарплата: {result['avg_salary']:.2f} {result['currency'] or 'RUR'}")
@@ -198,8 +198,8 @@ class MainMenu:
             return
 
         for i, vacancy in enumerate(vacancies, 1):
-            salary_from = f"от {vacancy['salary_from']} {vacancy['salary_currency']}" if vacancy['salary_from'] else ""
-            salary_to = f"до {vacancy['salary_to']} {vacancy['salary_currency']}" if vacancy['salary_to'] else ""
+            salary_from = f"от {vacancy['salary_from']} {vacancy['salary_currency']}" if vacancy["salary_from"] else ""
+            salary_to = f"до {vacancy['salary_to']} {vacancy['salary_currency']}" if vacancy["salary_to"] else ""
             salary = " ".join(filter(None, [salary_from, salary_to]))
 
             print(f"\n{i}. {vacancy['vacancy_name']}")
@@ -226,8 +226,8 @@ class MainMenu:
             return
 
         for i, vacancy in enumerate(vacancies, 1):
-            salary_from = f"от {vacancy['salary_from']} {vacancy['salary_currency']}" if vacancy['salary_from'] else ""
-            salary_to = f"до {vacancy['salary_to']} {vacancy['salary_currency']}" if vacancy['salary_to'] else ""
+            salary_from = f"от {vacancy['salary_from']} {vacancy['salary_currency']}" if vacancy["salary_from"] else ""
+            salary_to = f"до {vacancy['salary_to']} {vacancy['salary_currency']}" if vacancy["salary_to"] else ""
             salary = " ".join(filter(None, [salary_from, salary_to]))
             salary = salary or "з/п не указана"
 
@@ -242,7 +242,8 @@ class MainMenu:
     def _clear_screen():
         """Очищает экран консоли."""
         import os
-        os.system('cls' if os.name == 'nt' else 'clear')
+
+        os.system("cls" if os.name == "nt" else "clear")
 
 
 def main():

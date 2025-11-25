@@ -1,9 +1,9 @@
-from typing import List, Dict, Any, Optional
 import json
+from typing import Any, Dict, List, Optional
 
 from src.database import DatabaseConnection, execute_query
 from src.models.employer import Employer
-from src.models.vacancy import Vacancy, Salary
+from src.models.vacancy import Vacancy
 
 
 class DBManager:
@@ -22,10 +22,7 @@ class DBManager:
         :return: Список словарей с информацией о компаниях и количестве вакансий
         """
         query = """
-        SELECT 
-            e.id, 
-            e.name, 
-            COUNT(v.id) as vacancies_count
+        SELECT e.id, e.name, COUNT(v.id) as vacancies_count
         FROM employers e
         LEFT JOIN vacancies v ON e.id = v.employer_id
         GROUP BY e.id, e.name
@@ -46,10 +43,7 @@ class DBManager:
         :param employer_id: ID работодателя
         :return: Объект Employer или None, если работодатель не найден
         """
-        query = """
-        SELECT * FROM employers 
-        WHERE id = %s
-        """
+        query = """SELECT * FROM employers WHERE id = %s"""
 
         result = execute_query(query, (employer_id,), fetch=True)
         if not result:
@@ -66,13 +60,9 @@ class DBManager:
         :return: True, если операция выполнена успешно, иначе False
         """
         query = """
-        INSERT INTO employers (
-            id, name, url, site_url, description, 
-            logo_url, open_vacancies, trusted, created_at
-        ) VALUES (
-            %(id)s, %(name)s, %(url)s, %(site_url)s, %(description)s, 
-            %(logo_url)s, %(open_vacancies)s, %(trusted)s, %(created_at)s
-        )
+        INSERT INTO employers (id, name, url, site_url, description, logo_url, open_vacancies, trusted, created_at)
+        VALUES (%(id)s, %(name)s, %(url)s, %(site_url)s, %(description)s,
+        %(logo_url)s, %(open_vacancies)s, %(trusted)s, %(created_at)s)
         ON CONFLICT (id) DO UPDATE SET
             name = EXCLUDED.name,
             url = EXCLUDED.url,
@@ -102,20 +92,10 @@ class DBManager:
         :return: Список словарей с информацией о вакансиях
         """
         query = """
-        SELECT 
-            v.id,
-            v.name as vacancy_name,
-            e.name as company_name,
-            v.salary_from,
-            v.salary_to,
-            v.salary_currency,
-            v.salary_gross,
-            v.url
-        FROM vacancies v
-        JOIN employers e ON v.employer_id = e.id
-        ORDER BY 
-            COALESCE(v.salary_to, v.salary_from, 0) DESC,
-            v.published_at DESC
+        SELECT v.id, v.name as vacancy_name, e.name as company_name,
+        v.salary_from, v.salary_to, v.salary_currency, v.salary_gross, v.url
+        FROM vacancies v JOIN employers e ON v.employer_id = e.id
+        ORDER BY COALESCE(v.salary_to, v.salary_from, 0) DESC, v.published_at DESC
         """
 
         with DatabaseConnection() as conn:
@@ -133,19 +113,14 @@ class DBManager:
         :return: Список объектов Vacancy
         """
         query = """
-        SELECT * FROM vacancies 
-        WHERE employer_id = %s
-        ORDER BY published_at DESC
+        SELECT * FROM vacancies WHERE employer_id = %s ORDER BY published_at DESC
         """
 
         with DatabaseConnection() as conn:
             with conn.cursor() as cur:
                 cur.execute(query, (employer_id,))
                 columns = [desc[0] for desc in cur.description]
-                return [
-                    Vacancy.from_dict(dict(zip(columns, row)))
-                    for row in cur.fetchall()
-                ]
+                return [Vacancy.from_dict(dict(zip(columns, row))) for row in cur.fetchall()]
 
     @staticmethod
     def save_vacancy(vacancy: Vacancy) -> bool:
@@ -186,18 +161,20 @@ class DBManager:
 
         # Подготавливаем данные для вставки
         vacancy_dict = vacancy.to_dict()
-        salary = vacancy_dict.pop('salary', {})
+        salary = vacancy_dict.pop("salary", {})
 
         # Добавляем поля зарплаты в основной словарь
-        vacancy_dict.update({
-            'salary_from': salary.get('from'),
-            'salary_to': salary.get('to'),
-            'salary_currency': salary.get('currency'),
-            'salary_gross': salary.get('gross', False)
-        })
+        vacancy_dict.update(
+            {
+                "salary_from": salary.get("from"),
+                "salary_to": salary.get("to"),
+                "salary_currency": salary.get("currency"),
+                "salary_gross": salary.get("gross", False),
+            }
+        )
 
         # Сериализуем JSON-поля
-        for field in ['experience', 'employment', 'schedule', 'key_skills']:
+        for field in ["experience", "employment", "schedule", "key_skills"]:
             if field in vacancy_dict and vacancy_dict[field] is not None:
                 vacancy_dict[field] = json.dumps(vacancy_dict[field])
 
@@ -242,10 +219,7 @@ class DBManager:
                     return {"avg_salary": 0, "currency": None}
 
                 # Возвращаем первую валюту (можно доработать для поддержки нескольких валют)
-                return {
-                    "avg_salary": float(result[0][0]),
-                    "currency": result[0][1] or 'RUR'
-                }
+                return {"avg_salary": float(result[0][0]), "currency": result[0][1] or "RUR"}
 
     @staticmethod
     def get_vacancies_with_higher_salary() -> List[Dict[str, Any]]:
@@ -308,6 +282,6 @@ class DBManager:
 
         with DatabaseConnection() as conn:
             with conn.cursor() as cur:
-                cur.execute(query, (f'%{keyword.lower()}%',))
+                cur.execute(query, (f"%{keyword.lower()}%",))
                 columns = [desc[0] for desc in cur.description]
                 return [dict(zip(columns, row)) for row in cur.fetchall()]
